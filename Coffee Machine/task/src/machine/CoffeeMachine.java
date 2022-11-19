@@ -26,8 +26,6 @@ public class CoffeeMachine {
         coffeeBeansCapacity = 120;
         disposableCups = 9;
         money = 550;
-        printDetail();
-        this.setMaxCoffeeCups(WATER, MILK, COFFEE_BEANS);
     }
 
     public CoffeeMachine(int waterCapacity, int milkCapacity, int coffeeBeansCapacity) {
@@ -76,6 +74,13 @@ public class CoffeeMachine {
         this.money = money;
     }
 
+    private void setMaxCoffeeCups(int waterNeeded, int milkNeeded, int coffeeBeansNeeded) {
+        int waterRemain = waterCapacity / waterNeeded;
+        int milkRemain = milkCapacity / milkNeeded;
+        int coffeeBeansRemain = coffeeBeansCapacity / coffeeBeansNeeded;
+        MAX_COFFEE_CUPS = Math.min(Math.min(waterRemain, milkRemain), coffeeBeansRemain);
+    }
+
     static void printSteps() {
         String[] outputs = new String[] {
                 "Starting to make a coffee",
@@ -102,24 +107,32 @@ public class CoffeeMachine {
     }
 
     public void start() {
-        System.out.println("Write action (buy, fill, take): ");
+        showMainMenu();
+    }
+
+    public void showMainMenu() {
         Scanner scanner = new Scanner(System.in);
-        String menu = scanner.next();
-        switch (menu) {
-            case "buy" -> buyCoffee();
-            case "fill" -> fillMachine();
-            case "take" -> takeMoney();
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("Write action (buy, fill, take, remaining, exit): ");
+            String menu = scanner.next();
+            switch (menu) {
+                case "buy" -> buyCoffee();
+                case "fill" -> fillMachine();
+                case "take" -> takeMoney();
+                case "remaining" -> printDetail();
+                case "exit" -> exit = true;
+            }
         }
-        printDetail();
     }
 
     public void fillMachine() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Write how many ml of water the coffee machine want to add:");
+        System.out.println("Write how many ml of water you want to add:");
         int water = scanner.nextInt();
-        System.out.println("Write how many ml of milk the coffee machine want to add:");
+        System.out.println("Write how many ml of milk you want to add:");
         int milk = scanner.nextInt();
-        System.out.println("Write how many grams of coffee beans the coffee machine want to add:");
+        System.out.println("Write how many grams of coffee beans you want to add:");
         int coffeeBeans = scanner.nextInt();
         System.out.println("Write how many disposable cups you want to add: ");
         int disposableCups = scanner.nextInt();
@@ -131,35 +144,32 @@ public class CoffeeMachine {
 
     private void buyCoffee() {
         Scanner scanner = new Scanner(System.in);
-        System.out.println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino: ");
-        int flavour = scanner.nextInt();
+        System.out.println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu: ");
+        String flavour = scanner.next();
 
         Coffee coffee = switch (flavour) {
-            case 1 -> Coffee.ESPRESSO;
-            case 2 -> Coffee.LATTE;
-            case 3 -> Coffee.CAPPUCCINO;
+            case "1" -> Coffee.ESPRESSO;
+            case "2" -> Coffee.LATTE;
+            case "3" -> Coffee.CAPPUCCINO;
             default -> null;
         };
 
         if (coffee != null) {
-            this.setWaterCapacity(this.getWaterCapacity() - coffee.getWater());
-            this.setMilkCapacity(this.getMilkCapacity() - coffee.getMilk());
-            this.setCoffeeBeansCapacity(this.getCoffeeBeansCapacity() - coffee.getCoffeeBeans());
-            this.setDisposableCups(this.getDisposableCups() - 1);
-            this.setMoney(this.getMoney() + coffee.getPrice());
+            boolean hasEnoughResources = validateResource(coffee);
+            if (hasEnoughResources) {
+                this.setWaterCapacity(this.getWaterCapacity() - coffee.getWater());
+                this.setMilkCapacity(this.getMilkCapacity() - coffee.getMilk());
+                this.setCoffeeBeansCapacity(this.getCoffeeBeansCapacity() - coffee.getCoffeeBeans());
+                this.setDisposableCups(this.getDisposableCups() - 1);
+                this.setMoney(this.getMoney() + coffee.getPrice());
+                System.out.println("I have enough resources, making you a coffee!");
+            }
         }
     }
 
     private void takeMoney() {
         System.out.printf("I gave you $%d%n", this.getMoney());
         this.setMoney(0);
-    }
-
-    private void setMaxCoffeeCups(int waterNeeded, int milkNeeded, int coffeeBeansNeeded) {
-        int waterRemain = waterCapacity / waterNeeded;
-        int milkRemain = milkCapacity / milkNeeded;
-        int coffeeBeansRemain = coffeeBeansCapacity / coffeeBeansNeeded;
-        MAX_COFFEE_CUPS = Math.min(Math.min(waterRemain, milkRemain), coffeeBeansRemain);
     }
 
     void calculateIngredients(int cups) {
@@ -185,5 +195,27 @@ public class CoffeeMachine {
                 System.out.println("Yes, I can make that amount of coffee");
             }
         }
+    }
+
+    boolean validateResource(Coffee coffee) {
+        boolean enoughWater = this.getWaterCapacity() > coffee.getWater();
+        boolean enoughMilk  = this.getMilkCapacity() > coffee.getMilk();
+        boolean enoughCoffeeBeans = this.getCoffeeBeansCapacity() > coffee.getCoffeeBeans();
+        boolean enoughDisposableCups = this.getDisposableCups() > 0;
+
+        if (!enoughWater) {
+            System.out.println("Sorry, not enough water!");
+        }
+        if (!enoughMilk) {
+            System.out.println("Sorry, not enough milk!");
+        }
+        if (!enoughCoffeeBeans) {
+            System.out.println("Sorry, not enough coffee beans!");
+        }
+        if (!enoughDisposableCups) {
+            System.out.println("Sorry, not enough disposable cups!");
+        }
+
+        return enoughWater && enoughMilk && enoughCoffeeBeans && enoughDisposableCups;
     }
 }
