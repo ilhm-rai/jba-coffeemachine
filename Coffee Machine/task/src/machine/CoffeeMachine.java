@@ -6,7 +6,6 @@ import static machine.CoffeeMachineState.*;
 
 public class CoffeeMachine {
 
-    // one cup of coffee made on this coffee machine contains 200 ml of water, 50 ml of milk, and 15 g of coffee beans.
     private int money;
     private int waterCapacity;
     private int milkCapacity;
