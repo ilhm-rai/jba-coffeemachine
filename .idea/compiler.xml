@@ -8,6 +8,7 @@
       <module name="Coffee_Machine.Coffee_Machine-task-build-reports-tests.main" target="15" />
       <module name="Coffee_Machine.Coffee_Machine-task-build-test-results.main" target="15" />
       <module name="Coffee_Machine.Coffee_Machine-task-build-tmp.main" target="15" />
+      <module name="Coffee_Machine.Coffee_Machine-task-out.main" target="15" />
       <module name="Coffee_Machine.Coffee_Machine-task.main" target="15" />
       <module name="Coffee_Machine.util.main" target="15" />
     </bytecodeTargetLevel>

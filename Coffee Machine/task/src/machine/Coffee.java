@@ -17,6 +17,7 @@ public enum Coffee {
         this.coffeeBeans = coffeeBeans;
         this.price = price;
     }
+
     public int getWater() {
         return water;
     }
