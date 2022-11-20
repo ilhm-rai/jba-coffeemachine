@@ -13,6 +13,15 @@ public class CoffeeMachine {
     private int disposableCups;
     private CoffeeMachineState state;
 
+    public CoffeeMachine() {
+        this.waterCapacity = 0;
+        this.milkCapacity = 0;
+        this.coffeeBeansCapacity = 0;
+        this.disposableCups = 0;
+        this.money = 0;
+        this.state = CoffeeMachineState.CHOOSE_ACTION;
+    }
+
     public CoffeeMachine(int waterCapacity, int milkCapacity, int coffeeBeansCapacity, int disposableCups, int money) {
         this.waterCapacity = waterCapacity;
         this.milkCapacity = milkCapacity;
@@ -79,7 +88,7 @@ public class CoffeeMachine {
         state = state.nextState();
     }
 
-    public void printDetail() {
+    private void printResource() {
         System.out.println("The coffee machine has:");
         System.out.printf("%d ml of water%n", waterCapacity);
         System.out.printf("%d ml of milk%n", milkCapacity);
@@ -97,7 +106,7 @@ public class CoffeeMachine {
         }
     }
 
-    public void showContext() {
+    private void showContext() {
         String context = switch (this.getState()) {
             case CHOOSE_ACTION -> "Write action (buy, fill, take, remaining, exit):";
             case BUY -> "What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu:";
@@ -110,18 +119,18 @@ public class CoffeeMachine {
         System.out.println(context);
     }
 
-    public void chooseAction(String action) {
+    private void chooseAction(String action) {
         switch (action) {
             case "buy" -> this.setState(BUY);
             case "fill" -> this.setState(FILL_WATER);
             case "take" -> this.takeMoney();
-            case "remaining" -> this.printDetail();
+            case "remaining" -> this.printResource();
             case "exit" -> this.setState(EXIT);
             default -> throw new IllegalStateException("Unexpected value: " + action);
         }
     }
 
-    void doAction(String input) {
+    private void doAction(String input) {
         switch (state) {
             case CHOOSE_ACTION -> this.chooseAction(input);
             case BUY -> {
@@ -137,7 +146,7 @@ public class CoffeeMachine {
         }
     }
 
-    public void fillMachine(int amount) {
+    private void fillMachine(int amount) {
         switch (this.getState()) {
             case FILL_WATER -> this.setWaterCapacity(this.getWaterCapacity() + amount);
             case FILL_MILK -> this.setMilkCapacity(this.getMilkCapacity() + amount);
@@ -172,7 +181,7 @@ public class CoffeeMachine {
         this.setMoney(0);
     }
 
-    boolean validateResource(Coffee coffee) {
+    private boolean validateResource(Coffee coffee) {
         boolean enoughWater = this.getWaterCapacity() > coffee.getWater();
         boolean enoughMilk = this.getMilkCapacity() > coffee.getMilk();
         boolean enoughCoffeeBeans = this.getCoffeeBeansCapacity() > coffee.getCoffeeBeans();
