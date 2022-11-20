@@ -13,11 +13,6 @@ public class CoffeeMachine {
     private int disposableCups;
     private CoffeeMachineState state;
 
-    public static void main(String[] args) {
-        CoffeeMachine machine = new CoffeeMachine(400, 540, 120, 9, 550);
-        machine.start();
-    }
-
     public CoffeeMachine(int waterCapacity, int milkCapacity, int coffeeBeansCapacity, int disposableCups, int money) {
         this.waterCapacity = waterCapacity;
         this.milkCapacity = milkCapacity;
@@ -25,6 +20,11 @@ public class CoffeeMachine {
         this.disposableCups = disposableCups;
         this.money = money;
         this.state = CoffeeMachineState.CHOOSE_ACTION;
+    }
+
+    public static void main(String[] args) {
+        CoffeeMachine machine = new CoffeeMachine(400, 540, 120, 9, 550);
+        machine.start();
     }
 
     public int getWaterCapacity() {
@@ -91,68 +91,58 @@ public class CoffeeMachine {
     public void start() {
         Scanner scanner = new Scanner(System.in);
         while (this.getState() != EXIT) {
-            if (getState().equals(CHOOSE_ACTION)) {
-                showActionMenu();
-            }
+            showContext();
             String action = scanner.next();
             doAction(action);
         }
     }
 
-    public void showActionMenu() {
-        System.out.println("Write action (buy, fill, take, remaining, exit): ");
+    public void showContext() {
+        String context = switch (this.getState()) {
+            case CHOOSE_ACTION -> "Write action (buy, fill, take, remaining, exit):";
+            case BUY -> "What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu:";
+            case FILL_WATER -> "Write how many ml of water you want to add:";
+            case FILL_MILK -> "Write how many ml of milk you want to add:";
+            case FILL_COFFEE_BEANS -> "Write how many grams of coffee beans you want to add:";
+            case ADD_CUPS -> "Write how many disposable cups you want to add: ";
+            case EXIT -> null;
+        };
+        System.out.println(context);
     }
 
     public void chooseAction(String action) {
         switch (action) {
-            case "buy" -> {
-                setState(BUY);
-                System.out.println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu: ");
-            }
-            case "fill" -> {
-                setState(FILL_WATER);
-                System.out.println("Write how many ml of water you want to add:");
-            }
-            case "take" -> takeMoney();
-            case "remaining" -> printDetail();
-            case "exit" -> setState(EXIT);
+            case "buy" -> this.setState(BUY);
+            case "fill" -> this.setState(FILL_WATER);
+            case "take" -> this.takeMoney();
+            case "remaining" -> this.printDetail();
+            case "exit" -> this.setState(EXIT);
             default -> throw new IllegalStateException("Unexpected value: " + action);
         }
     }
 
     void doAction(String input) {
         switch (state) {
-            case CHOOSE_ACTION -> chooseAction(input);
+            case CHOOSE_ACTION -> this.chooseAction(input);
             case BUY -> {
                 if (!input.equals("back")) {
-                    buyCoffee(Integer.parseInt(input));
+                    this.buyCoffee(Integer.parseInt(input));
                 }
-                nextState();
+                this.nextState();
             }
-            case FILL_WATER, FILL_MILK, FILl_COFFEE_BEANS, FILL_CUPS -> {
-                fillMachine(Integer.parseInt(input));
-                nextState();
+            case FILL_WATER, FILL_MILK, FILL_COFFEE_BEANS, ADD_CUPS -> {
+                this.fillMachine(Integer.parseInt(input));
+                this.nextState();
             }
         }
     }
 
     public void fillMachine(int amount) {
-        switch (getState()) {
-            case FILL_WATER -> {
-                this.setWaterCapacity(this.getWaterCapacity() + amount);
-                System.out.println("Write how many ml of milk you want to add:");
-            }
-            case FILL_MILK -> {
-                this.setMilkCapacity(this.getMilkCapacity() + amount);
-                System.out.println("Write how many grams of coffee beans you want to add:");
-            }
-            case FILl_COFFEE_BEANS -> {
-                this.setCoffeeBeansCapacity(this.getCoffeeBeansCapacity() + amount);
-                System.out.println("Write how many disposable cups you want to add: ");
-            }
-            case FILL_CUPS -> {
-                this.setDisposableCups(this.getDisposableCups() + amount);
-            }
+        switch (this.getState()) {
+            case FILL_WATER -> this.setWaterCapacity(this.getWaterCapacity() + amount);
+            case FILL_MILK -> this.setMilkCapacity(this.getMilkCapacity() + amount);
+            case FILL_COFFEE_BEANS -> this.setCoffeeBeansCapacity(this.getCoffeeBeansCapacity() + amount);
+            case ADD_CUPS -> this.setDisposableCups(this.getDisposableCups() + amount);
         }
     }
 
@@ -184,7 +174,7 @@ public class CoffeeMachine {
 
     boolean validateResource(Coffee coffee) {
         boolean enoughWater = this.getWaterCapacity() > coffee.getWater();
-        boolean enoughMilk  = this.getMilkCapacity() > coffee.getMilk();
+        boolean enoughMilk = this.getMilkCapacity() > coffee.getMilk();
         boolean enoughCoffeeBeans = this.getCoffeeBeansCapacity() > coffee.getCoffeeBeans();
         boolean enoughDisposableCups = this.getDisposableCups() > 0;
 
